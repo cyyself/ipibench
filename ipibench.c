@@ -32,11 +32,12 @@ static ssize_t ipibench_status_store(struct kobject *kobj, struct kobj_attribute
     if (cnt >= 1) {
         if (!ipibench_waiting) {
             int nr_ipi;
+            int i;
             sscanf(buf, "%d", &nr_ipi);
             ipibench_counter.counter = 1ll* num_online_cpus() * nr_ipi;
             ipibench_waiting = true;
             ipibench_ts = ktime_get();
-            for (int i=0;i<nr_ipi;i++) {
+            for (i=0;i<nr_ipi;i++) {
                 on_each_cpu(ipibench_do, NULL, 0);
             }
         }
@@ -58,8 +59,8 @@ static struct attribute_group ipibench_attr_group = {
 struct kobject *ipibench_kobj;
 
 static int __init ipibench_init(void) {
+    int ret;
     ipibench_kobj = kobject_create_and_add("ipibench", kernel_kobj);
-    int ret = 0;
     if (!(ipibench_kobj)) {
         ret = -ENOMEM;
         goto fail;
